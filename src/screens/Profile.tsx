@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
-import { User, Crown, LogOut, Check, MapPin } from "lucide-react";
+import { User, Crown, LogOut, Check, MapPin, Edit3 } from "lucide-react";
 import { T, INTENTIONS } from "../tokens";
 import { Btn } from "../components/ui/Btn";
 import { Glass } from "../components/ui/Glass";
 
-export function Profile({ user, onPrem, onLogout }: any) {
+export function Profile({ user, onPrem, onLogout, onEdit }: any) {
   const intention = INTENTIONS.find(i => i.key === user.intention);
 
   return (
@@ -17,6 +17,7 @@ export function Profile({ user, onPrem, onLogout }: any) {
         <h2 style={{ fontSize: 22, fontWeight: 800, color: T.tx, display: "flex", alignItems: "center", gap: 8 }}>
           {user.firstName}, {user.age} ans {user.isPremium && <Crown size={20} color={T.gold} fill={T.gold} />}
         </h2>
+        {user.occupation && <p style={{ fontSize: 13, color: T.acL, marginTop: 2 }}>{user.occupation}</p>}
         {user.city && (
           <div style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 4 }}>
             <MapPin size={14} color={T.txD} />
@@ -32,6 +33,11 @@ export function Profile({ user, onPrem, onLogout }: any) {
         <div style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap", justifyContent: "center" }}>
           {user.passions?.map((p: string) => <span key={p} style={{ padding: "5px 12px", borderRadius: 50, fontSize: 11, fontWeight: 600, background: "rgba(139,92,246,0.1)", color: T.acL, border: "1px solid rgba(139,92,246,0.15)" }}>{p}</span>)}
         </div>
+
+        {/* Edit button */}
+        <Btn variant="ghost" size="sm" style={{ marginTop: 16 }} onClick={onEdit}>
+          <Edit3 size={16} /> Modifier mon profil
+        </Btn>
       </div>
 
       {/* Premium */}

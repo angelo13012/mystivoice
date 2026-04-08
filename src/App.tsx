@@ -11,6 +11,7 @@ import { MatchPopup } from "./screens/MatchPopup";
 import { Matches } from "./screens/Matches";
 import { Chat } from "./screens/Chat";
 import { Profile } from "./screens/Profile";
+import { EditProfile } from "./screens/EditProfile";
 
 export default function App() {
   const { userData, loading, signup, login, logout, updateProfile } = useAuth();
@@ -97,11 +98,11 @@ export default function App() {
   };
 
   const user = userData || tempUser;
-  const isApp = ["discovery", "matches", "chat", "profile"].includes(scr);
+  const isApp = ["discovery", "matches", "chat", "profile", "edit"].includes(scr);
 
   return (
     <div style={{ fontFamily: "'Satoshi',system-ui,sans-serif", background: T.bg, color: T.tx, minHeight: "100vh", maxWidth: 480, margin: "0 auto", position: "relative", overflow: "hidden" }}>
-      {isApp && scr !== "chat" && (
+      {isApp && scr !== "chat" && scr !== "edit" && (
         <header style={{ padding: "14px 20px", background: T.bgGlass, backdropFilter: "blur(20px)", borderBottom: `1px solid ${T.bd}`, display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 100 }}>
           <h1 style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.5, background: `linear-gradient(135deg,${T.ac},${T.rose})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>MeetVoice</h1>
         </header>
@@ -114,10 +115,11 @@ export default function App() {
         {scr === "discovery" && <Discovery key="d" profiles={MOCK_PROFILES} onLike={like} onPass={() => { }} />}
         {scr === "matches" && <Matches key="m" matches={matches} isPrem={user?.isPremium} onOpen={(m: any) => { setActive(m); setScr("chat"); }} />}
         {scr === "chat" && active && <Chat key="c" match={active} isPrem={user?.isPremium} onSend={sendMsg} onBack={() => setScr("matches")} />}
-        {scr === "profile" && user && <Profile key="p" user={user} onPrem={() => updateProfile({ isPremium: !user.isPremium })} onLogout={handleLogout} />}
+        {scr === "profile" && user && <Profile key="p" user={user} onPrem={() => updateProfile({ isPremium: !user.isPremium })} onLogout={handleLogout} onEdit={() => setScr("edit")} />}
+        {scr === "edit" && user && <EditProfile key="e" user={user} onSave={async (data: any) => { await updateProfile(data); setScr("profile"); }} onBack={() => setScr("profile")} />}
       </AnimatePresence>
 
-      {isApp && scr !== "chat" && (
+      {isApp && scr !== "chat" && scr !== "edit" && (
         <nav style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 480, background: T.bgGlass, backdropFilter: "blur(20px)", borderTop: `1px solid ${T.bd}`, display: "flex", zIndex: 100, paddingBottom: 8 }}>
           {[{ k: "discovery", I: Sparkles, l: "Découvrir" }, { k: "matches", I: MessageCircle, l: "Messages" }, { k: "profile", I: User, l: "Profil" }].map(({ k, I, l }) => {
             const a = scr === k;
