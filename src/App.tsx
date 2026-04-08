@@ -95,7 +95,7 @@ function Splash({ onGo }: { onGo: (m: string) => void }) {
         <Headphones size={44} color="#fff"/>
       </motion.div>
       <motion.h1 initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{delay:0.4}}
-        style={{ fontSize:36, fontWeight:800, color:T.tx, letterSpacing:-1, marginBottom:8 }}>MystiVoice</motion.h1>
+        style={{ fontSize:36, fontWeight:800, color:T.tx, letterSpacing:-1, marginBottom:8 }}>MeetVoice</motion.h1>
       <motion.p initial={{opacity:0}} animate={{opacity:1}} transition={{delay:0.6}}
         style={{ fontSize:16, color:T.txM, textAlign:"center", maxWidth:280, lineHeight:1.6, marginBottom:48 }}>
         L'amour au premier <span style={{color:T.ac,fontWeight:700}}>son</span>.<br/>Découvrez les gens par leur voix, pas leur photo.
@@ -422,7 +422,7 @@ export default function App() {
     <div style={{fontFamily:"'Satoshi',system-ui,sans-serif",background:T.bg,color:T.tx,minHeight:"100vh",maxWidth:480,margin:"0 auto",position:"relative",overflow:"hidden"}}>
       {isApp&&scr!=="chat"&&(
         <header style={{padding:"14px 20px",background:T.bgGlass,backdropFilter:"blur(20px)",borderBottom:`1px solid ${T.bd}`,display:"flex",justifyContent:"space-between",alignItems:"center",position:"sticky",top:0,zIndex:100}}>
-          <h1 style={{fontSize:22,fontWeight:800,letterSpacing:-0.5,background:`linear-gradient(135deg,${T.ac},${T.rose})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>MystiVoice</h1>
+          <h1 style={{fontSize:22,fontWeight:800,letterSpacing:-0.5,background:`linear-gradient(135deg,${T.ac},${T.rose})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>MeetVoice</h1>
         </header>
       )}
       <AnimatePresence mode="wait">
