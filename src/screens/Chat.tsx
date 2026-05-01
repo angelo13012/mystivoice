@@ -57,7 +57,7 @@ export function Chat({ match, onSend, onBack, isPrem }: any) {
           {photos.slice(0, 3).map((url, i) => {
             const blur = getPhotoBlur(i, mc, isPrem);
             const unlocked = isPhotoUnlocked(i, mc, isPrem);
-            const thresholds = isPrem ? [0, 10, 20] : [0, 20, 40];
+            const thresholds = isPrem ? [0, 20, 40] : [20, 40, 60];
             return (
               <motion.div key={i} whileTap={unlocked ? { scale: 0.97 } : {}} onClick={() => unlocked && setSelectedPhoto(url)}
                 style={{ flex: 1, aspectRatio: "3/4", borderRadius: 12, overflow: "hidden", position: "relative", cursor: unlocked ? "pointer" : "default", border: `1px solid ${unlocked ? T.acL : T.bd}` }}>
@@ -95,12 +95,6 @@ export function Chat({ match, onSend, onBack, isPrem }: any) {
             <div style={{ padding: "12px 16px", borderRadius: 18, background: m.sid === "me" ? `linear-gradient(135deg,${T.ac},${T.acD})` : T.bgEl, color: m.sid === "me" ? "#fff" : T.tx, fontSize: 14, lineHeight: 1.5, borderBottomRightRadius: m.sid === "me" ? 4 : 18, borderBottomLeftRadius: m.sid === "me" ? 18 : 4 }}>
               {m.text}
             </div>
-            {m.unlockedPhoto && (
-              <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
-                style={{ marginTop: 8, padding: "10px 14px", borderRadius: 14, background: "rgba(139,92,246,0.1)", border: `1px solid ${T.ac}`, fontSize: 12, color: T.acL, textAlign: "center" }}>
-                ✨ Photo débloquée ! Regarde en haut 👆
-              </motion.div>
-            )}
           </motion.div>
         ))}
         <div ref={endRef} />

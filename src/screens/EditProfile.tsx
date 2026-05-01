@@ -49,8 +49,8 @@ export function EditProfile({ user, onSave, onBack, onUploadPhoto, onDeletePhoto
     setSaving(false);
   };
 
-  const photoThresholds = ["Visible dès le match", "Débloquée à 20 messages", "Débloquée à 40 messages"];
-  const photoThresholdsPrem = ["Visible dès le match", "Débloquée à 10 messages", "Débloquée à 20 messages"];
+  const photoThresholds = ["Débloquée à 20 messages", "Débloquée à 40 messages", "Débloquée à 60 messages"];
+  const photoThresholdsPrem = ["Visible dès le match ✨", "Débloquée à 20 messages", "Débloquée à 40 messages"];
 
   return (
     <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}
@@ -66,7 +66,7 @@ export function EditProfile({ user, onSave, onBack, onUploadPhoto, onDeletePhoto
       <SectionTitle title="Mes photos (max 3)" />
       <Glass style={{ padding: 16, marginBottom: 8 }}>
         <p style={{ fontSize: 12, color: T.txM, marginBottom: 16, lineHeight: 1.5 }}>
-          📸 Les photos se dévoilent progressivement au fil de vos échanges. La première est visible dès le match !
+          📸 Les photos se dévoilent progressivement au fil de vos échanges.{user.isPremium ? " Premium : la 1ère est visible dès le match !" : " Gratuit : débloquées à 20, 40 et 60 messages."}
         </p>
         <div style={{ display: "flex", gap: 10 }}>
           {[0, 1, 2].map(i => {
@@ -102,7 +102,7 @@ export function EditProfile({ user, onSave, onBack, onUploadPhoto, onDeletePhoto
                     <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "rgba(139,92,246,0.04)" }} />
                   )}
                 </div>
-                <span style={{ fontSize: 9, color: i === 0 ? T.emerald : T.ac, fontWeight: 600, textAlign: "center", lineHeight: 1.3 }}>{threshold}</span>
+                <span style={{ fontSize: 9, color: user.isPremium && i === 0 ? T.emerald : T.ac, fontWeight: 600, textAlign: "center", lineHeight: 1.3 }}>{threshold}</span>
                 <input ref={fileRefs[i]} type="file" accept="image/*" style={{ display: "none" }}
                   onChange={e => e.target.files?.[0] && handlePhotoUpload(i, e.target.files[0])} />
               </div>

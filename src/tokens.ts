@@ -39,14 +39,14 @@ export const MOCK_PROFILES = [
   { id:"p5", firstName:"Sofia", age:25, bio:"Danseuse et prof de yoga. L'énergie qu'on dégage compte plus que le physique.", occupation:"Danseuse", passions:["Danse","Yoga","Méditation"], photos:["https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=600&fit=crop","https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=600&fit=crop","https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=600&fit=crop"], grad:["#D946EF","#8B5CF6"], intention:"open", city:"Toulouse" },
 ];
 
-// Seuils : photo1=20, photo2=40, photo3=60 (premium /2)
+// Gratuit : 20 / 40 / 60 — Premium : 0 / 20 / 40
 const THRESHOLDS = [20, 40, 60];
-const THRESHOLDS_PREM = [10, 20, 30];
+const THRESHOLDS_PREM = [0, 20, 40];
 
 export const getPhotoBlur = (photoIndex: number, msgCount: number, isPrem: boolean): number => {
   const thresholds = isPrem ? THRESHOLDS_PREM : THRESHOLDS;
   const threshold = thresholds[photoIndex];
-  if (msgCount >= threshold) return 0;
+  if (threshold === 0 || msgCount >= threshold) return 0;
   const ratio = msgCount / threshold;
   return Math.round(28 * (1 - ratio));
 };
@@ -73,11 +73,10 @@ export const getUnlockedCount = (msgCount: number, isPrem: boolean): number => {
 };
 
 export const getTotalPct = (msgCount: number, isPrem: boolean): number => {
-  const max = isPrem ? 30 : 60;
+  const max = isPrem ? 40 : 60;
   return Math.min(100, Math.round((msgCount / max) * 100));
 };
 
-// Compat anciens composants
 export const getBlur = (n: number, p: boolean) => getPhotoBlur(0, n, p);
 export const getPct = (n: number, p: boolean) => getTotalPct(n, p);
 export const getLeft = (n: number, p: boolean) => getMessagesLeft(n, p);
