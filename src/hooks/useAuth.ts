@@ -72,7 +72,6 @@ export function useAuth() {
     setUserData((prev: any) => ({ ...prev, ...data }));
   };
 
-  // Upload une photo à l'index donné (0, 1, 2)
   const uploadPhoto = async (file: File, index: number): Promise<string> => {
     if (!firebaseUser) throw new Error("Non connecté");
     const storageRef = ref(storage, `users/${firebaseUser.uid}/photo_${index}`);
@@ -81,12 +80,10 @@ export function useAuth() {
     const currentPhotos: string[] = [...(userData?.photos || [])];
     while (currentPhotos.length <= index) currentPhotos.push("");
     currentPhotos[index] = url;
-    const cleanPhotos = currentPhotos.filter(Boolean);
     await updateProfile({ photos: currentPhotos });
     return url;
   };
 
-  // Supprime une photo à l'index donné
   const deletePhoto = async (index: number): Promise<void> => {
     if (!firebaseUser) return;
     try {
