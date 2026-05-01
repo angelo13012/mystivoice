@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, MapPin, Save, Camera, X, Plus, Lock } from "lucide-react";
+import { ArrowLeft, MapPin, Save, X, Plus, Lock } from "lucide-react";
 import { T, PASSIONS, INTENTIONS } from "../tokens";
 import { Btn } from "../components/ui/Btn";
 import { Inp } from "../components/ui/Inp";
@@ -49,7 +49,6 @@ export function EditProfile({ user, onSave, onBack, onUploadPhoto, onDeletePhoto
     setSaving(false);
   };
 
-  const photoLabels = ["Photo principale", "2ème photo", "3ème photo"];
   const photoThresholds = ["Visible dès le match", "Débloquée à 20 messages", "Débloquée à 40 messages"];
   const photoThresholdsPrem = ["Visible dès le match", "Débloquée à 10 messages", "Débloquée à 20 messages"];
 
@@ -57,7 +56,6 @@ export function EditProfile({ user, onSave, onBack, onUploadPhoto, onDeletePhoto
     <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}
       style={{ padding: "0 20px 120px", background: T.bg, minHeight: "100vh" }}>
 
-      {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 0", position: "sticky", top: 0, background: T.bg, zIndex: 10 }}>
         <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", color: T.txM, display: "flex", padding: 4 }}>
           <ArrowLeft size={22} />
@@ -65,7 +63,6 @@ export function EditProfile({ user, onSave, onBack, onUploadPhoto, onDeletePhoto
         <h2 style={{ fontSize: 20, fontWeight: 800, color: T.tx, flex: 1 }}>Modifier mon profil</h2>
       </div>
 
-      {/* PHOTOS */}
       <SectionTitle title="Mes photos (max 3)" />
       <Glass style={{ padding: 16, marginBottom: 8 }}>
         <p style={{ fontSize: 12, color: T.txM, marginBottom: 16, lineHeight: 1.5 }}>
@@ -114,7 +111,6 @@ export function EditProfile({ user, onSave, onBack, onUploadPhoto, onDeletePhoto
         </div>
       </Glass>
 
-      {/* Genre */}
       <SectionTitle title="Genre" />
       <div style={{ display: "flex", gap: 8 }}>
         {[{ v: "homme", l: "Homme" }, { v: "femme", l: "Femme" }, { v: "non-binaire", l: "Non-binaire" }].map(({ v, l }) =>
@@ -125,7 +121,6 @@ export function EditProfile({ user, onSave, onBack, onUploadPhoto, onDeletePhoto
         )}
       </div>
 
-      {/* Intention */}
       <SectionTitle title="Je recherche" />
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {INTENTIONS.map(({ key, label, emoji, desc }) =>
@@ -140,7 +135,6 @@ export function EditProfile({ user, onSave, onBack, onUploadPhoto, onDeletePhoto
         )}
       </div>
 
-      {/* Passions */}
       <SectionTitle title={`Passions (${passions.length}/5)`} />
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
         {PASSIONS.map(p => { const s = passions.includes(p); return (
@@ -151,7 +145,6 @@ export function EditProfile({ user, onSave, onBack, onUploadPhoto, onDeletePhoto
         ); })}
       </div>
 
-      {/* Localisation */}
       <SectionTitle title="Localisation" />
       <Inp label="Ma ville" icon={MapPin} placeholder="Paris, Lyon, Marseille..." value={city} onChange={(e: any) => setCity(e.target.value)} />
       <div style={{ marginTop: 12 }}>
@@ -174,21 +167,17 @@ export function EditProfile({ user, onSave, onBack, onUploadPhoto, onDeletePhoto
         </div>
       </div>
 
-      {/* Métier */}
       <SectionTitle title="Métier" />
       <Inp placeholder="Ex: Architecte, Étudiant, Chef cuisinier..." value={occupation} onChange={(e: any) => setOccupation(e.target.value)} />
 
-      {/* Ce que je cherche */}
       <SectionTitle title="Ce que je cherche" />
       <Inp placeholder="Ex: Quelqu'un de drôle et spontané..." value={lookingFor} onChange={(e: any) => setLookingFor(e.target.value)} />
 
-      {/* Bio */}
       <SectionTitle title="Bio" />
       <textarea value={bio} onChange={(e: any) => setBio(e.target.value)} placeholder="Parlez de vous..." maxLength={300}
         style={{ width: "100%", background: T.bgEl, border: `1px solid ${T.bd}`, borderRadius: 14, padding: "14px 16px", color: T.tx, fontSize: 15, fontFamily: "inherit", outline: "none", boxSizing: "border-box", minHeight: 100, resize: "none" }} />
       <span style={{ fontSize: 11, color: T.txD, textAlign: "right", display: "block", marginTop: 4 }}>{bio.length}/300</span>
 
-      {/* Save */}
       <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 480, padding: "16px 20px", background: T.bgGlass, backdropFilter: "blur(20px)", borderTop: `1px solid ${T.bd}`, zIndex: 50 }}>
         <Btn size="lg" style={{ width: "100%" }} onClick={handleSave} disabled={saving}>
           <Save size={18} /> {saving ? "Sauvegarde..." : "Sauvegarder"}

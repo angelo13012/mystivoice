@@ -16,11 +16,6 @@ export function Chat({ match, onSend, onBack, isPrem }: any) {
 
   const send = () => { if (!inp.trim()) return; onSend(match.id, inp.trim()); setInp(""); };
 
-  const unlockedJustNow = (prevMc: number) => {
-    const thresholds = isPrem ? [10, 20, 30] : [20, 40, 60];
-    return thresholds.some(t => prevMc < t && mc >= t);
-  };
-
   return (
     <motion.div initial={{ x: 300, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 300, opacity: 0 }}
       style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 4px)", background: T.bg }}>
@@ -28,8 +23,6 @@ export function Chat({ match, onSend, onBack, isPrem }: any) {
       {/* Header */}
       <div style={{ padding: "14px 20px", background: T.bgCard, borderBottom: `1px solid ${T.bd}`, display: "flex", alignItems: "center", gap: 12 }}>
         <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", padding: 4, color: T.txM, display: "flex" }}><ArrowLeft size={22} /></button>
-
-        {/* Photos row */}
         <div style={{ display: "flex", gap: 6 }}>
           {photos.slice(0, 3).map((url, i) => {
             const blur = getPhotoBlur(i, mc, isPrem);
@@ -47,13 +40,10 @@ export function Chat({ match, onSend, onBack, isPrem }: any) {
             );
           })}
         </div>
-
         <div style={{ flex: 1 }}>
           <span style={{ fontSize: 15, fontWeight: 700, color: T.tx }}>{match.prof.firstName}</span>
           {left > 0 && nextAt && (
-            <div style={{ fontSize: 11, color: T.ac, marginTop: 1 }}>
-              📸 +{left} msg pour débloquer une photo
-            </div>
+            <div style={{ fontSize: 11, color: T.ac, marginTop: 1 }}>📸 +{left} msg pour débloquer une photo</div>
           )}
           {left === 0 && (
             <div style={{ fontSize: 11, color: T.emerald, marginTop: 1 }}>✨ Toutes les photos débloquées !</div>
