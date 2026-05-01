@@ -7,7 +7,8 @@ import {
 } from "firebase/auth";
 import type { User } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import { auth, db } from "../firebase";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { auth, db, storage } from "../firebase";
 
 export function useAuth() {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
@@ -41,7 +42,7 @@ export function useAuth() {
       passions: profile.passions || [],
       occupation: profile.occupation || "",
       lookingFor: profile.lookingFor || "",
-      photoUrl: "",
+      photos: [],
       voiceUrl: "",
       isPremium: false,
       createdAt: Date.now(),
@@ -71,5 +72,31 @@ export function useAuth() {
     setUserData((prev: any) => ({ ...prev, ...data }));
   };
 
-  return { firebaseUser, userData, loading, signup, login, logout, updateProfile };
+  // Upload une photo à l'index donné (0, 1, 2)
+  const uploadPhoto = async (file: File, index: number): Promise<string> => {
+    if (!firebaseUser) throw new Error("Non connecté");
+    const storageRef = ref(storage, `users/${firebaseUser.uid}/photo_${index}`);
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
+    const currentPhotos: string[] = [...(userData?.photos || [])];
+    while (currentPhotos.length <= index) currentPhotos.push("");
+    currentPhotos[index] = url;
+    const cleanPhotos = currentPhotos.filter(Boolean);
+    await updateProfile({ photos: currentPhotos });
+    return url;
+  };
+
+  // Supprime une photo à l'index donné
+  const deletePhoto = async (index: number): Promise<void> => {
+    if (!firebaseUser) return;
+    try {
+      const storageRef = ref(storage, `users/${firebaseUser.uid}/photo_${index}`);
+      await deleteObject(storageRef);
+    } catch {}
+    const currentPhotos: string[] = [...(userData?.photos || [])];
+    currentPhotos[index] = "";
+    await updateProfile({ photos: currentPhotos });
+  };
+
+  return { firebaseUser, userData, loading, signup, login, logout, updateProfile, uploadPhoto, deletePhoto };
 }

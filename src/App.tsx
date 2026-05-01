@@ -14,7 +14,7 @@ import { Profile } from "./screens/Profile";
 import { EditProfile } from "./screens/EditProfile";
 
 export default function App() {
-  const { userData, loading, signup, login, logout, updateProfile } = useAuth();
+  const { userData, loading, signup, login, logout, updateProfile, uploadPhoto, deletePhoto } = useAuth();
   const [scr, setScr] = useState("splash");
   const [authMode, setAM] = useState("signup");
   const [tempUser, setTempUser] = useState<any>(null);
@@ -116,7 +116,7 @@ export default function App() {
         {scr === "matches" && <Matches key="m" matches={matches} isPrem={user?.isPremium} onOpen={(m: any) => { setActive(m); setScr("chat"); }} />}
         {scr === "chat" && active && <Chat key="c" match={active} isPrem={user?.isPremium} onSend={sendMsg} onBack={() => setScr("matches")} />}
         {scr === "profile" && user && <Profile key="p" user={user} onPrem={() => updateProfile({ isPremium: !user.isPremium })} onLogout={handleLogout} onEdit={() => setScr("edit")} />}
-        {scr === "edit" && user && <EditProfile key="e" user={user} onSave={async (data: any) => { await updateProfile(data); setScr("profile"); }} onBack={() => setScr("profile")} />}
+        {scr === "edit" && user && <EditProfile key="e" user={user} onSave={async (data: any) => { await updateProfile(data); setScr("profile"); }} onBack={() => setScr("profile")} onUploadPhoto={uploadPhoto} onDeletePhoto={deletePhoto} />}
       </AnimatePresence>
 
       {isApp && scr !== "chat" && scr !== "edit" && (

@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, MapPin, Save } from "lucide-react";
+import { ArrowLeft, MapPin, Save, Camera, X, Plus, Lock } from "lucide-react";
 import { T, PASSIONS, INTENTIONS } from "../tokens";
 import { Btn } from "../components/ui/Btn";
 import { Inp } from "../components/ui/Inp";
+import { Glass } from "../components/ui/Glass";
 
-export function EditProfile({ user, onSave, onBack }: any) {
+export function EditProfile({ user, onSave, onBack, onUploadPhoto, onDeletePhoto }: any) {
   const [gender, setGender] = useState(user.gender || "");
   const [intention, setIntention] = useState(user.intention || "");
   const [passions, setPassions] = useState<string[]>(user.passions || []);
@@ -15,14 +16,42 @@ export function EditProfile({ user, onSave, onBack }: any) {
   const [occupation, setOccupation] = useState(user.occupation || "");
   const [lookingFor, setLookingFor] = useState(user.lookingFor || "");
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState<number | null>(null);
+  const [photos, setPhotos] = useState<string[]>(user.photos || []);
+  const fileRefs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)];
 
   const togP = (p: string) => passions.includes(p) ? setPassions(passions.filter(x => x !== p)) : passions.length < 5 && setPassions([...passions, p]);
+
+  const handlePhotoUpload = async (index: number, file: File) => {
+    setUploading(index);
+    try {
+      const url = await onUploadPhoto(file, index);
+      const updated = [...photos];
+      while (updated.length <= index) updated.push("");
+      updated[index] = url;
+      setPhotos(updated);
+    } catch (e) {
+      console.error(e);
+    }
+    setUploading(null);
+  };
+
+  const handleDeletePhoto = async (index: number) => {
+    await onDeletePhoto(index);
+    const updated = [...photos];
+    updated[index] = "";
+    setPhotos(updated);
+  };
 
   const handleSave = async () => {
     setSaving(true);
     await onSave({ gender, intention, passions, city, radius, bio, occupation, lookingFor });
     setSaving(false);
   };
+
+  const photoLabels = ["Photo principale", "2ème photo", "3ème photo"];
+  const photoThresholds = ["Visible dès le match", "Débloquée à 20 messages", "Débloquée à 40 messages"];
+  const photoThresholdsPrem = ["Visible dès le match", "Débloquée à 10 messages", "Débloquée à 20 messages"];
 
   return (
     <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}
@@ -35,6 +64,55 @@ export function EditProfile({ user, onSave, onBack }: any) {
         </button>
         <h2 style={{ fontSize: 20, fontWeight: 800, color: T.tx, flex: 1 }}>Modifier mon profil</h2>
       </div>
+
+      {/* PHOTOS */}
+      <SectionTitle title="Mes photos (max 3)" />
+      <Glass style={{ padding: 16, marginBottom: 8 }}>
+        <p style={{ fontSize: 12, color: T.txM, marginBottom: 16, lineHeight: 1.5 }}>
+          📸 Les photos se dévoilent progressivement au fil de vos échanges. La première est visible dès le match !
+        </p>
+        <div style={{ display: "flex", gap: 10 }}>
+          {[0, 1, 2].map(i => {
+            const url = photos[i];
+            const isLocked = i > 0;
+            const threshold = user.isPremium ? photoThresholdsPrem[i] : photoThresholds[i];
+            return (
+              <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+                <div style={{ position: "relative", aspectRatio: "3/4", borderRadius: 14, overflow: "hidden", background: T.bgEl, border: `1px solid ${url ? "transparent" : T.bd}` }}>
+                  {url ? (
+                    <>
+                      <img src={url} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="" />
+                      <button onClick={() => handleDeletePhoto(i)}
+                        style={{ position: "absolute", top: 6, right: 6, width: 24, height: 24, borderRadius: "50%", background: "rgba(0,0,0,0.6)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <X size={14} color="#fff" />
+                      </button>
+                    </>
+                  ) : (
+                    <button onClick={() => fileRefs[i].current?.click()}
+                      style={{ width: "100%", height: "100%", background: "transparent", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                      {uploading === i ? (
+                        <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          style={{ width: 24, height: 24, borderRadius: "50%", border: `2px solid ${T.bd}`, borderTopColor: T.ac }} />
+                      ) : (
+                        <>
+                          {isLocked ? <Lock size={20} color={T.txD} /> : <Plus size={20} color={T.txD} />}
+                          <span style={{ fontSize: 10, color: T.txD, textAlign: "center" }}>{i === 0 ? "Ajouter" : `Photo ${i + 1}`}</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                  {isLocked && !url && (
+                    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "rgba(139,92,246,0.04)" }} />
+                  )}
+                </div>
+                <span style={{ fontSize: 9, color: i === 0 ? T.emerald : T.ac, fontWeight: 600, textAlign: "center", lineHeight: 1.3 }}>{threshold}</span>
+                <input ref={fileRefs[i]} type="file" accept="image/*" style={{ display: "none" }}
+                  onChange={e => e.target.files?.[0] && handlePhotoUpload(i, e.target.files[0])} />
+              </div>
+            );
+          })}
+        </div>
+      </Glass>
 
       {/* Genre */}
       <SectionTitle title="Genre" />
@@ -100,21 +178,17 @@ export function EditProfile({ user, onSave, onBack }: any) {
       <SectionTitle title="Métier" />
       <Inp placeholder="Ex: Architecte, Étudiant, Chef cuisinier..." value={occupation} onChange={(e: any) => setOccupation(e.target.value)} />
 
-      {/* Ce que je cherche (texte libre) */}
-      <SectionTitle title="Ce que je cherche (en quelques mots)" />
+      {/* Ce que je cherche */}
+      <SectionTitle title="Ce que je cherche" />
       <Inp placeholder="Ex: Quelqu'un de drôle et spontané..." value={lookingFor} onChange={(e: any) => setLookingFor(e.target.value)} />
 
       {/* Bio */}
       <SectionTitle title="Bio" />
-      <textarea
-        value={bio} onChange={(e: any) => setBio(e.target.value)}
-        placeholder="Parlez de vous..."
-        maxLength={300}
-        style={{ width: "100%", background: T.bgEl, border: `1px solid ${T.bd}`, borderRadius: 14, padding: "14px 16px", color: T.tx, fontSize: 15, fontFamily: "inherit", outline: "none", boxSizing: "border-box", minHeight: 100, resize: "none" }}
-      />
+      <textarea value={bio} onChange={(e: any) => setBio(e.target.value)} placeholder="Parlez de vous..." maxLength={300}
+        style={{ width: "100%", background: T.bgEl, border: `1px solid ${T.bd}`, borderRadius: 14, padding: "14px 16px", color: T.tx, fontSize: 15, fontFamily: "inherit", outline: "none", boxSizing: "border-box", minHeight: 100, resize: "none" }} />
       <span style={{ fontSize: 11, color: T.txD, textAlign: "right", display: "block", marginTop: 4 }}>{bio.length}/300</span>
 
-      {/* Save button */}
+      {/* Save */}
       <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 480, padding: "16px 20px", background: T.bgGlass, backdropFilter: "blur(20px)", borderTop: `1px solid ${T.bd}`, zIndex: 50 }}>
         <Btn size="lg" style={{ width: "100%" }} onClick={handleSave} disabled={saving}>
           <Save size={18} /> {saving ? "Sauvegarde..." : "Sauvegarder"}
