@@ -34,14 +34,12 @@ export default function App() {
     }
   }, [loading, userData]);
 
-  // Écoute les matches en temps réel
   useEffect(() => {
     if (!userData?.id) return;
     const unsub = listenMatches(userData.id, (m) => setMatches(m));
     return unsub;
   }, [userData?.id]);
 
-  // Écoute les messages du chat actif en temps réel
   useEffect(() => {
     if (!active?.id) return;
     const unsub = listenMessages(active.id, (msgs) => {
@@ -126,7 +124,7 @@ export default function App() {
         {scr === "onboarding" && <Onboarding key="o" userData={user} onDone={handleOnboardDone} />}
         {scr === "discovery" && <Discovery key="d" currentUid={userData?.id} onLike={handleLike} onPass={handlePass} />}
         {scr === "matches" && <Matches key="m" matches={matches} isPrem={user?.isPremium} onOpen={(m: any) => { setActive(m); setScr("chat"); }} />}
-        {scr === "chat" && active && <Chat key="c" match={active} isPrem={user?.isPremium} onSend={handleSendMsg} onBack={() => setScr("matches")} />}
+        {scr === "chat" && active && <Chat key="c" match={active} isPrem={user?.isPremium} currentUid={userData?.id} onSend={handleSendMsg} onBack={() => setScr("matches")} />}
         {scr === "profile" && user && <Profile key="p" user={user} onPrem={() => updateProfile({ isPremium: !user.isPremium })} onLogout={handleLogout} onEdit={() => setScr("edit")} />}
         {scr === "edit" && user && <EditProfile key="e" user={user} onSave={async (data: any) => { await updateProfile(data); setScr("profile"); }} onBack={() => setScr("profile")} onUploadPhoto={uploadPhoto} onDeletePhoto={deletePhoto} />}
       </AnimatePresence>
