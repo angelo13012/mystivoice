@@ -82,3 +82,31 @@ export function listenMessages(matchId: string, callback: (msgs: any[]) => void)
     callback(snap.docs.map(d => ({ id: d.id, ...d.data() })));
   });
 }
+
+// Récupère les profils qui ont liké l'utilisateur (sans match encore)
+export async function getWhoLikedMe(currentUid: string): Promise<any[]> {
+  // Tous ceux qui m'ont liké
+  const likesSnap = await getDocs(query(collection(db, "likes"), where("to", "==", currentUid)));
+  const likerUids: string[] = [];
+  likesSnap.forEach(d => likerUids.push(d.data().from));
+
+  // Exclut ceux avec qui on a déjà matché
+  const matchesSnap = await getDocs(query(collection(db, "matches"), where("users", "array-contains", currentUid)));
+  const matchedUids = new Set<string>();
+  matchesSnap.forEach(d => {
+    const other = d.data().users.find((u: string) => u !== currentUid);
+    if (other) matchedUids.add(other);
+  });
+
+  // Récupère les profils
+  const profiles: any[] = [];
+  await Promise.all(
+    likerUids
+      .filter(uid => !matchedUids.has(uid))
+      .map(async uid => {
+        const snap = await getDoc(doc(db, "users", uid));
+        if (snap.exists()) profiles.push({ id: uid, ...snap.data() });
+      })
+  );
+  return profiles;
+}

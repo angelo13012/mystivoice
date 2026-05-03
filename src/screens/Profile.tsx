@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
-import { User, Crown, LogOut, Check, MapPin, Edit3 } from "lucide-react";
+import { User, Crown, LogOut, Check, MapPin, Edit3, Heart } from "lucide-react";
 import { T, INTENTIONS } from "../tokens";
 import { Btn } from "../components/ui/Btn";
 import { Glass } from "../components/ui/Glass";
 
-export function Profile({ user, onPrem, onLogout, onEdit }: any) {
+export function Profile({ user, onPrem, onLogout, onEdit, onWhoLiked, likedCount }: any) {
   const intention = INTENTIONS.find(i => i.key === user.intention);
 
   return (
@@ -33,12 +33,26 @@ export function Profile({ user, onPrem, onLogout, onEdit }: any) {
         <div style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap", justifyContent: "center" }}>
           {user.passions?.map((p: string) => <span key={p} style={{ padding: "5px 12px", borderRadius: 50, fontSize: 11, fontWeight: 600, background: "rgba(139,92,246,0.1)", color: T.acL, border: "1px solid rgba(139,92,246,0.15)" }}>{p}</span>)}
         </div>
-
-        {/* Edit button */}
         <Btn variant="ghost" size="sm" style={{ marginTop: 16 }} onClick={onEdit}>
           <Edit3 size={16} /> Modifier mon profil
         </Btn>
       </div>
+
+      {/* Qui m'a liké */}
+      <motion.button whileTap={{ scale: 0.98 }} onClick={onWhoLiked}
+        style={{ width: "100%", padding: "16px 20px", borderRadius: 18, border: `1px solid ${user.isPremium ? "rgba(244,63,94,0.2)" : T.bd}`, background: user.isPremium ? "rgba(244,63,94,0.05)" : T.bgCard, cursor: "pointer", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 14, marginBottom: 14, textAlign: "left" }}>
+        <div style={{ width: 44, height: 44, borderRadius: 14, background: "rgba(244,63,94,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Heart size={22} color={T.rose} fill={user.isPremium ? T.rose : "none"} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <p style={{ fontSize: 15, fontWeight: 700, color: T.tx }}>Qui m'a liké</p>
+          <p style={{ fontSize: 12, color: T.txM, marginTop: 2 }}>
+            {user.isPremium ? (likedCount > 0 ? `${likedCount} personne${likedCount > 1 ? "s ont" : " a"} liké ton profil` : "Personne pour l'instant") : "🔒 Fonctionnalité Premium"}
+          </p>
+        </div>
+        {!user.isPremium && <span style={{ fontSize: 11, color: T.gold, fontWeight: 700, padding: "4px 10px", borderRadius: 50, background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)" }}>Premium</span>}
+        {user.isPremium && likedCount > 0 && <span style={{ fontSize: 13, fontWeight: 800, color: T.rose, padding: "4px 12px", borderRadius: 50, background: "rgba(244,63,94,0.1)" }}>{likedCount}</span>}
+      </motion.button>
 
       {/* Premium */}
       <Glass style={{ padding: 20, marginBottom: 14, background: user.isPremium ? "rgba(245,158,11,0.05)" : T.bgCard }}>
@@ -54,7 +68,7 @@ export function Profile({ user, onPrem, onLogout, onEdit }: any) {
           </div>
           <Btn variant={user.isPremium ? "ghost" : "gold"} size="sm" onClick={onPrem}>{user.isPremium ? "Actif ✓" : "S'abonner"}</Btn>
         </div>
-        {["Défloutage 2× plus rapide", "Likes illimités", "Voir qui vous a liké", "Filtres avancés"].map(f => (
+        {["1ère photo visible dès le match", "Défloutage 2× plus rapide", "Voir qui vous a liké", "Filtres avancés"].map(f => (
           <div key={f} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
             <Check size={14} color={T.emerald} />
             <span style={{ fontSize: 13, color: T.txM }}>{f}</span>
@@ -62,7 +76,6 @@ export function Profile({ user, onPrem, onLogout, onEdit }: any) {
         ))}
       </Glass>
 
-      {/* Logout */}
       <Btn variant="danger" size="md" style={{ width: "100%", marginTop: 8 }} onClick={onLogout}><LogOut size={18} /> Se déconnecter</Btn>
     </motion.div>
   );
