@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, MessageCircle, User } from "lucide-react";
-import { T, MOCK_PROFILES } from "./tokens";
+import { T } from "./tokens";
 import { useAuth } from "./hooks/useAuth";
 import { Splash } from "./screens/Splash";
 import { Auth } from "./screens/Auth";
@@ -12,6 +12,7 @@ import { Matches } from "./screens/Matches";
 import { Chat } from "./screens/Chat";
 import { Profile } from "./screens/Profile";
 import { EditProfile } from "./screens/EditProfile";
+import { likeUser, passUser, listenMatches, sendMessage, listenMessages } from "./services/matchingService";
 
 export default function App() {
   const { userData, loading, signup, login, logout, updateProfile, uploadPhoto, deletePhoto } = useAuth();
@@ -32,6 +33,23 @@ export default function App() {
       }
     }
   }, [loading, userData]);
+
+  // Écoute les matches en temps réel
+  useEffect(() => {
+    if (!userData?.id) return;
+    const unsub = listenMatches(userData.id, (m) => setMatches(m));
+    return unsub;
+  }, [userData?.id]);
+
+  // Écoute les messages du chat actif en temps réel
+  useEffect(() => {
+    if (!active?.id) return;
+    const unsub = listenMessages(active.id, (msgs) => {
+      setActive((prev: any) => prev ? { ...prev, msgs, mc: msgs.length } : prev);
+      setMatches(prev => prev.map(m => m.id === active.id ? { ...m, msgs, mc: msgs.length } : m));
+    });
+    return unsub;
+  }, [active?.id]);
 
   if (loading) {
     return (
@@ -68,26 +86,20 @@ export default function App() {
     setScr("discovery");
   };
 
-  const like = (prof: any) => {
-    if (Math.random() > 0.3) {
-      const m = { id: `m-${Date.now()}`, prof, mc: 0, msgs: [] };
-      setMatches((p) => [m, ...p]);
-      setPopup(prof);
-    }
+  const handleLike = async (prof: any) => {
+    if (!userData?.id) return;
+    const isMatch = await likeUser(userData.id, prof.id);
+    if (isMatch) setPopup(prof);
   };
 
-  const sendMsg = (mid: string, text: string) => {
-    const msg = { id: `${Date.now()}`, sid: "me", text, ts: Date.now() };
-    const up = (m: any) => m.id === mid ? { ...m, msgs: [...m.msgs, msg], mc: m.mc + 1 } : m;
-    setMatches((p) => p.map(up));
-    setActive((p: any) => p && p.id === mid ? { ...p, msgs: [...p.msgs, msg], mc: p.mc + 1 } : p);
-    setTimeout(() => {
-      const reps = ["Haha j'adore ! 😄", "On a les mêmes goûts !", "Raconte-moi plus 🎤", "J'aime discuter avec toi", "Ça me fait sourire 😊", "Tu t'exprimes bien", "On devrait s'appeler !", "Tu es intéressant(e)"];
-      const r = { id: `${Date.now() + 1}`, sid: "other", text: reps[Math.floor(Math.random() * reps.length)], ts: Date.now() + 1 };
-      const up2 = (m: any) => m.id === mid ? { ...m, msgs: [...m.msgs, r], mc: m.mc + 1 } : m;
-      setMatches((p) => p.map(up2));
-      setActive((p: any) => p && p.id === mid ? { ...p, msgs: [...p.msgs, r], mc: p.mc + 1 } : p);
-    }, 1500 + Math.random() * 2000);
+  const handlePass = async (prof: any) => {
+    if (!userData?.id) return;
+    await passUser(userData.id, prof.id);
+  };
+
+  const handleSendMsg = async (matchId: string, text: string) => {
+    if (!userData?.id) return;
+    await sendMessage(matchId, userData.id, text);
   };
 
   const handleLogout = async () => {
@@ -112,9 +124,9 @@ export default function App() {
         {scr === "splash" && <Splash key="s" onGo={(m) => { setAM(m); setScr("auth"); }} />}
         {scr === "auth" && <Auth key="a" mode={authMode} onToggle={() => setAM((m: string) => m === "login" ? "signup" : "login")} onDone={handleAuthDone} />}
         {scr === "onboarding" && <Onboarding key="o" userData={user} onDone={handleOnboardDone} />}
-        {scr === "discovery" && <Discovery key="d" profiles={MOCK_PROFILES} onLike={like} onPass={() => { }} />}
+        {scr === "discovery" && <Discovery key="d" currentUid={userData?.id} onLike={handleLike} onPass={handlePass} />}
         {scr === "matches" && <Matches key="m" matches={matches} isPrem={user?.isPremium} onOpen={(m: any) => { setActive(m); setScr("chat"); }} />}
-        {scr === "chat" && active && <Chat key="c" match={active} isPrem={user?.isPremium} onSend={sendMsg} onBack={() => setScr("matches")} />}
+        {scr === "chat" && active && <Chat key="c" match={active} isPrem={user?.isPremium} onSend={handleSendMsg} onBack={() => setScr("matches")} />}
         {scr === "profile" && user && <Profile key="p" user={user} onPrem={() => updateProfile({ isPremium: !user.isPremium })} onLogout={handleLogout} onEdit={() => setScr("edit")} />}
         {scr === "edit" && user && <EditProfile key="e" user={user} onSave={async (data: any) => { await updateProfile(data); setScr("profile"); }} onBack={() => setScr("profile")} onUploadPhoto={uploadPhoto} onDeletePhoto={deletePhoto} />}
       </AnimatePresence>
