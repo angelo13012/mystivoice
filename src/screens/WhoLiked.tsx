@@ -6,7 +6,7 @@ import { getWhoLikedMe, likeUser } from "../services/matchingService";
 import { Btn } from "../components/ui/Btn";
 import { Glass } from "../components/ui/Glass";
 
-export function WhoLikedMe({ currentUid, isPrem, onBack, onMatch }: any) {
+export function WhoLiked({ currentUid, isPrem, onBack, onMatch }: any) {
   const [profiles, setProfiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [liking, setLiking] = useState<string | null>(null);
